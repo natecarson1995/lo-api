@@ -117,9 +117,9 @@ func main() {
 
 		var command exec.Cmd
 		if hasAudio {
-			command = *exec.Command("ffmpeg", "-i", videoURL, "-i", audioURL, "-f", "matroska", "-")
+			command = *exec.Command("./bin/ffmpeg", "-i", videoURL, "-i", audioURL, "-f", "matroska", "-")
 		} else {
-			command = *exec.Command("ffmpeg", "-i", videoURL, "-f", "matroska", "-")
+			command = *exec.Command("./bin/ffmpeg", "-i", videoURL, "-f", "matroska", "-")
 		}
 
 		ctx.Writer.Header().Set("Content-type", "video/mp4")

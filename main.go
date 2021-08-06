@@ -91,7 +91,7 @@ func isURLOkay(url string) bool {
 func main() {
 	router := gin.Default()
 
-	router.GET("/test/:id", func(ctx *gin.Context) {
+	router.GET("/d/:id", func(ctx *gin.Context) {
 		if os.Getenv("DEBUG_MODE") != "TRUE" {
 			ctx.String(400, "No")
 			return
@@ -135,7 +135,7 @@ func main() {
 			return false
 		})
 	})
-	router.GET("/:id", func(ctx *gin.Context) {
+	router.GET("/v/:id", func(ctx *gin.Context) {
 		stripEndings := regexp.MustCompile(`(\.mp4)|(\.mkv)`)
 
 		id := ctx.Params.ByName("id")

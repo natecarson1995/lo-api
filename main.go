@@ -115,12 +115,12 @@ func main() {
 
 		var command exec.Cmd
 		if hasAudio {
-			command = *exec.Command("ffmpeg", "-i", videoURL, "-i", audioURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
+			command = *exec.Command("ffmpeg", "-i", videoURL, "-i", audioURL, "-c:v", "libx264", "-c:a", "aac", "-vf", "scale='min(iw,720)':-2", "-strict", "-2", "-movflags", "frag_keyframe+empty_moov", "-f", "mp4", "pipe:1")
 		} else {
-			command = *exec.Command("ffmpeg", "-i", videoURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
+			command = *exec.Command("ffmpeg", "-i", videoURL, "-c:v", "libx264", "-vf", "scale='min(iw,720)':-2", "-strict", "-2", "-movflags", "frag_keyframe+empty_moov", "-f", "mp4", "pipe:1")
 		}
 
-		ctx.Writer.Header().Set("Content-type", "video/mkv")
+		ctx.Writer.Header().Set("Content-type", "video/mp4")
 		ctx.Stream(func(w io.Writer) bool {
 			pr, pw := io.Pipe()
 			command.Stdout = pw

@@ -134,6 +134,7 @@ func main() {
 	router.GET("/test/:id", func(ctx *gin.Context) {
 		if os.Getenv("DEBUG_MODE") != "TRUE" {
 			ctx.String(400, "No")
+			return
 		}
 		stripEndings := regexp.MustCompile(`(\.mp4)|(\.mkv)`)
 

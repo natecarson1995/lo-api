@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -54,7 +53,6 @@ func getPostJson(id string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Print(newUrl)
 	pageText, err := getPageAsText(fmt.Sprintf(`%s.json`, newUrl))
 	if err != nil {
 		return "", err
@@ -115,19 +113,24 @@ func main() {
 		audioURL := convertVideoToAudioURL(videoURL)
 		hasAudio := isURLOkay(audioURL)
 
+		ffmpegLocation := os.Getenv("FFMPEG_COMMAND")
 		var command exec.Cmd
 		if hasAudio {
-			command = *exec.Command("./bin/ffmpeg", "-i", videoURL, "-i", audioURL, "-f", "matroska", "-")
+			command = *exec.Command(ffmpegLocation, "-i", videoURL, "-i", audioURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
 		} else {
-			command = *exec.Command("./bin/ffmpeg", "-i", videoURL, "-f", "matroska", "-")
+			command = *exec.Command(ffmpegLocation, "-i", videoURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
 		}
 
-		ctx.Writer.Header().Set("Content-type", "video/mp4")
-		ctx.Writer.Header().Set("Content-Disposition", `attachment; filename="test.mp4"`)
+		ctx.Writer.Header().Set("Content-type", "video/mkv")
+		ctx.Writer.Header().Set("Content-Disposition", "attachment;filename=video.mkv")
 		ctx.Stream(func(w io.Writer) bool {
 			pr, pw := io.Pipe()
+			er, ew := io.Pipe()
 			command.Stdout = pw
+			command.Stderr = ew
 			go io.Copy(w, pr)
+			go io.Copy(os.Stdout, er)
+			//go io.Copy(os.Stdout, pr)
 			command.Run()
 			return false
 		})

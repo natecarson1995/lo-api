@@ -169,7 +169,6 @@ func main() {
 		ctx.Stream(func(w io.Writer) bool {
 			pr, pw := io.Pipe()
 			command.Stderr = pw
-			command.Stdout = pw
 			go io.Copy(w, pr)
 			//go io.Copy(os.Stdout, pr)
 			command.Run()

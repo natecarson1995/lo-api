@@ -113,12 +113,11 @@ func main() {
 		audioURL := convertVideoToAudioURL(videoURL)
 		hasAudio := isURLOkay(audioURL)
 
-		ffmpegLocation := os.Getenv("FFMPEG_COMMAND")
 		var command exec.Cmd
 		if hasAudio {
-			command = *exec.Command(ffmpegLocation, "-i", videoURL, "-i", audioURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
+			command = *exec.Command("ffmpeg", "-i", videoURL, "-i", audioURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
 		} else {
-			command = *exec.Command(ffmpegLocation, "-i", videoURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
+			command = *exec.Command("ffmpeg", "-i", videoURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
 		}
 
 		ctx.Writer.Header().Set("Content-type", "video/mkv")

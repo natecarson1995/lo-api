@@ -121,7 +121,6 @@ func main() {
 		}
 
 		ctx.Writer.Header().Set("Content-type", "video/mkv")
-		ctx.Writer.Header().Set("Content-Disposition", "attachment;filename=video.mkv")
 		ctx.Stream(func(w io.Writer) bool {
 			pr, pw := io.Pipe()
 			command.Stdout = pw

@@ -131,6 +131,49 @@ func main() {
 			return false
 		})
 	})
+	router.GET("/test/:id", func(ctx *gin.Context) {
+		if os.Getenv("DEBUG_MODE") != "TRUE" {
+			ctx.String(400, "No")
+		}
+		stripEndings := regexp.MustCompile(`(\.mp4)|(\.mkv)`)
+
+		id := ctx.Params.ByName("id")
+		id = stripEndings.ReplaceAllString(id, "")
+
+		if !isURLOkay("https://v.redd.it/" + id) {
+			ctx.String(400, "Invalid url given")
+			return
+		}
+
+		json, err := getPostJson(id)
+		if err != nil {
+			ctx.String(400, "Error getting metadata: %s", err)
+			return
+		}
+
+		videoURL, _ := getVideoUrl(json)
+
+		audioURL := convertVideoToAudioURL(videoURL)
+		hasAudio := isURLOkay(audioURL)
+
+		var command exec.Cmd
+		if hasAudio {
+			command = *exec.Command("ffmpeg", "-i", videoURL, "-i", audioURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
+		} else {
+			command = *exec.Command("ffmpeg", "-i", videoURL, "-vf", "scale='min(iw,720)':-2", "-f", "matroska", "pipe:1")
+		}
+
+		ctx.Writer.Header().Set("Content-type", "application/octet-string")
+		ctx.Writer.Header().Set("Content-Disposition", "attachment;filename=output.txt")
+		ctx.Stream(func(w io.Writer) bool {
+			pr, pw := io.Pipe()
+			command.Stderr = pw
+			go io.Copy(w, pr)
+			//go io.Copy(os.Stdout, pr)
+			command.Run()
+			return false
+		})
+	})
 	port := os.Getenv("PORT")
 	router.Run(":" + port)
 }

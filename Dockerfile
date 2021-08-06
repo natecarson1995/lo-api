@@ -8,8 +8,7 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN apt-get update
-RUN apt-get install -y ffmpeg
+RUN apk add --no-cache ffmpeg
 
 RUN go build -o /server
 
